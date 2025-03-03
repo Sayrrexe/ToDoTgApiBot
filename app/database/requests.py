@@ -10,7 +10,6 @@ async def set_user(tg_id: int):
 async def get_tasks(tg_id: int):
     user, _ = await User.get_or_create(tg_id=tg_id)
     tasks = await Task.filter(user=user)
-    print(tasks)
     return tasks
     
 async def set_tasks(tg_id: int, task: str):
