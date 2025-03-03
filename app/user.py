@@ -1,11 +1,12 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
-from aiogram.filters import CommandStart, Command
+from aiogram.filters import CommandStart
 import app.keyboards as kb
 from app.database.requests import set_user, del_tasks, set_tasks
+
+
 user = Router()
 
-# user.message.middleware(BaseMiddleware())
 
 @user.message(CommandStart())
 async def cmd_start(message: Message):

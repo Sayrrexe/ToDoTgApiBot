@@ -1,30 +1,23 @@
-from app.database.models import async_session
+import logging
+
 from app.database.models import User, Task
-from sqlalchemy import select, delete
 
-async def set_user(tg_id):
-    async with async_session() as session:
-        user = await session.scalar(select(User).where(User.tg_id == tg_id))
-        
-        if not user:
-            session.add(User(tg_id=tg_id))
-            await session.commit()
+logger = logging.getLogger(__name__)
 
-async def get_tasks(tg_id):
-    async with async_session() as session:
-        user = await session.scalar(select(User).where(User.tg_id == tg_id))
-        tasks = await session.scalars(select(Task).where(Task.user == user.id))
-        return tasks
+async def set_user(tg_id: int):
+    user = await User.get_or_create(tg_id=tg_id)
     
-async def set_tasks(tg_id, task):
-    async with async_session() as session:
-        user = await session.scalar(select(User).where(User.tg_id == tg_id))
-        session.add(Task(task=task,user=user.id))
-        await session.commit()
-        
-        
-async def del_tasks(task_id):
-    async with async_session() as session:
-        await session.execute(delete(Task).where(Task.id == task_id))
-        await session.commit()
-        
+async def get_tasks(tg_id: int):
+    user, _ = await User.get_or_create(tg_id=tg_id)
+    tasks = await Task.filter(user=user)
+    print(tasks)
+    return tasks
+    
+async def set_tasks(tg_id: int, task: str):
+    user, _ = await User.get_or_create(tg_id=tg_id)
+    await Task.create(user=user, task = task)
+
+async def del_tasks(task_id: int):
+    task = await Task.get_or_none(id=task_id)        
+    if task != None:
+        await task.delete()

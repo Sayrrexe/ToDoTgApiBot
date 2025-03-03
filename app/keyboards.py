@@ -1,6 +1,5 @@
-from aiogram.types import (ReplyKeyboardMarkup, KeyboardButton,
-                           InlineKeyboardMarkup, InlineKeyboardButton)
-from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
+from aiogram.types import (InlineKeyboardButton)
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from app.database.requests import get_tasks
 

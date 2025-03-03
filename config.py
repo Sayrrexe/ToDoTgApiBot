@@ -1,4 +1,10 @@
-TOKEN=''
-DB_URL='sqlite+aiosqlite:///db.sqlite3'
-#DB_URL='postgresql+asyncpg://user:password@host:port/dbname[?key=value&key=value...]'
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+TOKEN=os.getenv("TOKEN")
+DB_URL = os.getenv("DB_URL")
+
 
