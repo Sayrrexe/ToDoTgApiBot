@@ -1,6 +1,5 @@
-from aiogram.types import (InlineKeyboardButton)
+from aiogram.types import InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-
 from app.database.requests import get_tasks
 
 async def tasks(tg_id):
@@ -8,4 +7,10 @@ async def tasks(tg_id):
     keyboard = InlineKeyboardBuilder()
     for task in tasks:
         keyboard.add(InlineKeyboardButton(text=task.task, callback_data=f'task_{task.id}'))
+    keyboard.add(InlineKeyboardButton(text='Создать Напоминание!', callback_data='create_notify'))
     return keyboard.adjust(1).as_markup()
+
+
+notify_keyboard = InlineKeyboardMarkup([
+    InlineKeyboardButton(text='Единоразовое', callback_data='notify_')
+])

@@ -7,8 +7,8 @@ from aiogram.enums import ParseMode
 from tortoise import Tortoise
 
 from app.user import user
+from app.notifications import router as notification_router
 from config import TOKEN, DB_URL
-
 
 logger = logging.getLogger(__name__)
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
@@ -20,6 +20,10 @@ async def startup(dispatcher: Dispatcher):
         modules={"models": ["app.database.models"]},
     )
     await Tortoise.generate_schemas()
+    # Запускаем фонового планировщика уведомлений
+    from app.notifications import notification_scheduler
+    asyncio.create_task(notification_scheduler(bot))
+
 
 async def shutdown(dispatcher: Dispatcher):
     await Tortoise.close_connections()
@@ -29,6 +33,7 @@ async def shutdown(dispatcher: Dispatcher):
 async def main():
     dp = Dispatcher()
     dp.include_router(user)
+    dp.include_router(notification_router)
     dp.startup.register(startup)
     dp.shutdown.register(shutdown)
 
