@@ -27,23 +27,30 @@ async def del_tasks(task_id: int):
 
 
 # Функции для уведомлений
-async def create_notification(tg_id: int, notif_type: str, custom_text: str, schedule_time: datetime.datetime):
+async def create_notification(tg_id: int, notif_type: str, custom_text: str, schedule_time: datetime):
     user = await User.get_or_none(tg_id=tg_id)
     if not user:
         await set_user(tg_id)
         user = await User.get(tg_id=tg_id)
+
+    # Перевод времени из UTC+5 в UTC (если время передано в UTC+5)
+    schedule_time_utc = schedule_time - datetime.timedelta(hours=5)
+    
+    # Делаем время timezone-aware (UTC)
+    schedule_time_utc = schedule_time_utc.replace(tzinfo=datetime.timezone.utc)
+
+    # Сохраняем в БД
     notification = await Notification.create(
         user=user,
         notif_type=notif_type,
         custom_text=custom_text,
-        schedule_time=schedule_time
+        schedule_time=schedule_time_utc
     )
     return notification
 
-
 async def get_due_notifications():
-    now = datetime.datetime.utcnow()
-    notifications = await Notification.filter(schedule_time__lte=now, is_sent=False).all()
+    now = datetime.datetime.now(datetime.timezone.utc)
+    notifications = await Notification.filter(schedule_time__lte=now, is_sent=False).prefetch_related("user").all()
     return notifications
 
 

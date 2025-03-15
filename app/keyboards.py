@@ -11,6 +11,8 @@ async def tasks(tg_id):
     return keyboard.adjust(1).as_markup()
 
 
-notify_keyboard = InlineKeyboardMarkup([
-    InlineKeyboardButton(text='Единоразовое', callback_data='notify_')
+notify_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='Единоразовое', callback_data='notify_one-time')],
+    [InlineKeyboardButton(text='Ежедневное', callback_data='notify_daily')],
+    [InlineKeyboardButton(text='Ежемесячное', callback_data='notify_weekly')],
 ])
