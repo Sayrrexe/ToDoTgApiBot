@@ -5,7 +5,7 @@ from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 import app.keyboards as kb
 from app.states import NotificationStates
-from app.database.requests import set_user, del_tasks, set_tasks, create_notification, get_due_notifications, mark_notification_sent
+from app.database.requests import delete_notificatons_by_id, set_user, del_tasks, set_tasks, create_notification, get_user_notifications
 
 
 user = Router()
@@ -28,6 +28,25 @@ async def delete_task(callback: CallbackQuery):
 async def cmd_new_notification(callback: CallbackQuery):
     await callback.answer()  
     await callback.message.edit_text("Выберите тип уведомления:", reply_markup=kb.notify_keyboard)
+    
+@user.callback_query(F.data == 'delete_notify')
+async def choice_delete_notifications(callback: CallbackQuery):
+    user = callback.from_user.id
+    notifications = await get_user_notifications(user)
+    print(notifications)
+    text = 'Существующие Напоминания:\n\n'
+    for n in notifications:
+        text += f'{n.id}: {n.custom_text} | {n.notif_type} {n.schedule_time}\n'
+    text += '\nВыберите ID, который хотите удалить'    
+    
+    await callback.message.edit_text(text, reply_markup= await kb.delete_notifications_kb(notifications))
+
+@user.callback_query(F.data.startswith('deleteN_'))
+async def delete_notifications(callback: CallbackQuery):
+    id = callback.data.split('_')[-1]
+    await delete_notificatons_by_id(id)
+    await callback.message.delete()
+    await callback.message.answer('Нажмите на выполненную задачу, что бы удалить или напишите в чат новую', reply_markup=await kb.tasks(callback.from_user.id))
     
 @user.callback_query(F.data.startswith("notify_"))
 async def process_notification_type(callback: CallbackQuery, state: FSMContext):

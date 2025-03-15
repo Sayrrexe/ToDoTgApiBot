@@ -53,7 +53,21 @@ async def get_due_notifications():
     notifications = await Notification.filter(schedule_time__lte=now, is_sent=False).prefetch_related("user").all()
     return notifications
 
+async def get_user_notifications(tg_id: int):
+    user = await User.get(tg_id = tg_id)
+    if not user:
+        return []
+    notifications = await Notification.filter(user = user,  is_sent=False).all()
+    return notifications
 
+async def delete_notificatons_by_id(n_id: int):
+    print(n_id)
+    notification = await Notification.get(id = n_id)
+    print(notification)
+    await notification.delete()
+    
+
+    
 async def mark_notification_sent(notification: Notification):
     if notification.notif_type == "one-time":
         notification.is_sent = True

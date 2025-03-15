@@ -15,4 +15,14 @@ notify_keyboard = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='Единоразовое', callback_data='notify_one-time')],
     [InlineKeyboardButton(text='Ежедневное', callback_data='notify_daily')],
     [InlineKeyboardButton(text='Ежемесячное', callback_data='notify_weekly')],
+    [InlineKeyboardButton(text='Удалить Напоминание', callback_data='delete_notify')]
 ])
+
+
+async def delete_notifications_kb(notifications: list):
+    keyboard = InlineKeyboardBuilder()
+    for n in notifications:
+       id = str(n.id)
+       keyboard.add(InlineKeyboardButton(text=id, callback_data=f'deleteN_{id}')) 
+       
+    return keyboard.adjust(1).as_markup()
