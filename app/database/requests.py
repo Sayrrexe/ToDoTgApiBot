@@ -61,9 +61,7 @@ async def get_user_notifications(tg_id: int):
     return notifications
 
 async def delete_notificatons_by_id(n_id: int):
-    print(n_id)
     notification = await Notification.get(id = n_id)
-    print(notification)
     await notification.delete()
     
 

@@ -33,7 +33,6 @@ async def cmd_new_notification(callback: CallbackQuery):
 async def choice_delete_notifications(callback: CallbackQuery):
     user = callback.from_user.id
     notifications = await get_user_notifications(user)
-    print(notifications)
     text = 'Существующие Напоминания:\n\n'
     for n in notifications:
         text += f'{n.id}: {n.custom_text} | {n.notif_type} {n.schedule_time}\n'
@@ -52,11 +51,13 @@ async def delete_notifications(callback: CallbackQuery):
 async def process_notification_type(callback: CallbackQuery, state: FSMContext):
     notif_type = callback.data.split('_')[-1]
     await state.update_data(notif_type=notif_type)
+    await callback.message.delete()
     await callback.message.answer("Введите текст уведомления:")
     await state.set_state(NotificationStates.waiting_for_text)
     
 @user.message(NotificationStates.waiting_for_text)
 async def process_notification_text(message: Message, state: FSMContext):
+    await message.delete()
     notif_text = message.text
     await state.update_data(custom_text=notif_text)
     data = await state.get_data()
@@ -69,6 +70,7 @@ async def process_notification_text(message: Message, state: FSMContext):
     
 @user.message(NotificationStates.waiting_for_time)
 async def process_notification_time(message: Message, state: FSMContext):
+    await message.delete()
     time_input = message.text
     data = await state.get_data()
     notif_type = data.get("notif_type")
@@ -88,12 +90,13 @@ async def process_notification_time(message: Message, state: FSMContext):
         return
 
     await create_notification(user_id, notif_type, custom_text, schedule_time)
-    await message.answer("Уведомление создано!")
+    await message.answer('Нажмите на выполненную задачу, что бы удалить или напишите в чат новую', reply_markup=await kb.tasks(message.from_user.id))
     await state.clear()
 
 
 @user.message()
 async def set_user_task(message: Message):
+    await message.delete()
     if len(message.text) > 100:
         await message.answer('Ваше сообщение превышает лимит в 100 символов')
         return
